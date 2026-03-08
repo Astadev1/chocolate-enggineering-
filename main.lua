@@ -10,27 +10,44 @@
 -- LOAD MODULES DENGAN LOADSTRING (bukan require)
 -- ==================================================
 
--- Pertama, kita perlu base URL GitHub kamu
--- GANTI 'USERNAME' dan 'REPO' dengan punya kamu ya!
-local BASE_URL = "https://raw.githubusercontent.com/AstaDev/chocolate-enggineering-/main/"
+-- !!! PERBAIKAN 1: GANTI DENGAN RAW URL !!!
+local BASE_URL = "https://raw.githubusercontent.com/AstaDev1/chocolate-enggineering-/main/"
 
--- Load Utils
-local Utils = loadstring(game:HttpGet(BASE_URL .. "utils.lua"))()
+-- !!! PERBAIKAN 2: TAMBAHKAN CEK ERROR !!!
+local function loadModule(url, moduleName)
+    local success, result = pcall(function()
+        return loadstring(game:HttpGet(url))()
+    end)
+    
+    if success then
+        print("✅ Module " .. moduleName .. " loaded!")
+        return result
+    else
+        warn("❌ Gagal load " .. moduleName .. ": " .. tostring(result))
+        return nil
+    end
+end
 
--- Load AutoFarm
-local AutoFarm = loadstring(game:HttpGet(BASE_URL .. "auto_farm.lua"))()
+-- Load modules dengan error handling
+local Utils = loadModule(BASE_URL .. "utils.lua", "Utils")
+local AutoFarm = loadModule(BASE_URL .. "auto_farm.lua", "AutoFarm")
+local GachaExploit = loadModule(BASE_URL .. "gacha_exploit.lua", "GachaExploit")
+local Config = loadModule(BASE_URL .. "config.lua", "Config")
 
--- Load GachaExploit
-local GachaExploit = loadstring(game:HttpGet(BASE_URL .. "gacha_exploit.lua"))()
-
--- Load Config (opsional)
-local Config = loadstring(game:HttpGet(BASE_URL .. "config.lua"))()
+-- Cek apakah semua module terload
+if not Utils or not AutoFarm or not GachaExploit then
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "❌ ERROR",
+        Text = "Gagal load module! Cek koneksi atau URL",
+        Duration = 10
+    })
+    return
+end
 
 -- ==================================================
 -- GABUNGKAN DENGAN CONFIG DARI USER
 -- ==================================================
 if Config then
-    -- Terapkan config ke module
     if Config.AutoFarm then
         for k, v in pairs(Config.AutoFarm) do
             AutoFarm.Settings[k] = v
@@ -70,7 +87,9 @@ end)
 
 FarmSection:NewSlider("Farm Speed", "Kecepatan farming", 200, 50, function(value)
     AutoFarm.Settings.AttackSpeed = value / 1000
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
+    pcall(function()
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
+    end)
 end)
 
 FarmSection:NewDropdown("Farm Mode", "Pilih mode farming", {"Level", "Boss", "Quest"}, function(option)
@@ -87,7 +106,6 @@ end)
 local GachaTab = Window:NewTab("🎲 Gacha Exploit")
 local GachaSection = GachaTab:NewSection("No Cooldown System")
 
--- Daftar fruit
 local fruitList = {
     "Random", "Bomb", "Spike", "Chop", "Spring", "Kilo", "Spin", "Blade", 
     "Smoke", "Flame", "Ice", "Sand", "Dark", "Light", "Magma", "Quake", 
@@ -139,17 +157,18 @@ InfoSection:NewLabel("")
 InfoSection:NewLabel("📌 Status: 100% WORKING")
 InfoSection:NewLabel("")
 
--- Live stats
+-- Live stats dengan error handling
 InfoSection:NewLabel("⚡ Live Stats:")
-local levelLabel = InfoSection:NewLabel("Level: " .. Utils:GetPlayerLevel())
+local levelLabel = InfoSection:NewLabel("Level: " .. (pcall(Utils.GetPlayerLevel) and Utils:GetPlayerLevel() or "Unknown"))
 local gachaLabel = InfoSection:NewLabel("Gacha Count: 0")
 
--- Update stats setiap detik
 spawn(function()
     while true do
         task.wait(1)
-        levelLabel:Update("Level: " .. Utils:GetPlayerLevel())
-        gachaLabel:Update("Gacha Count: " .. GachaExploit.Stats.TotalGacha)
+        pcall(function()
+            levelLabel:Update("Level: " .. Utils:GetPlayerLevel())
+            gachaLabel:Update("Gacha Count: " .. GachaExploit.Stats.TotalGacha)
+        end)
     end
 end)
 
@@ -163,4 +182,4 @@ end)
 Utils:Notify("🍫 Chocolate Engineering", "Script loaded successfully!", 3, "chocolate")
 print("✅ Chocolate Engineering v2.0.1 loaded!")
 print("📌 Fitur: Auto Farm + Gacha No Cooldown")
-print("🔗 GitHub: https://github.com/AstaaDev/chocolate-enggineering-")
+print("🔗 GitHub: https://github.com/AstaDev1/chocolate-enggineering-")
