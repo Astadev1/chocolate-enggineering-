@@ -12,7 +12,7 @@
 
 -- Pertama, kita perlu base URL GitHub kamu
 -- GANTI 'USERNAME' dan 'REPO' dengan punya kamu ya!
-local BASE_URL = "https://raw.githubusercontent.com/USERNAME/REPO/main/"
+local BASE_URL = "https://raw.githubusercontent.com/AstaDev/chocolate-enggineering-/main/"
 
 -- Load Utils
 local Utils = loadstring(game:HttpGet(BASE_URL .. "utils.lua"))()
@@ -163,4 +163,4 @@ end)
 Utils:Notify("🍫 Chocolate Engineering", "Script loaded successfully!", 3, "chocolate")
 print("✅ Chocolate Engineering v2.0.1 loaded!")
 print("📌 Fitur: Auto Farm + Gacha No Cooldown")
-print("🔗 GitHub: https://github.com/USERNAME/REPO")
+print("🔗 GitHub: https://github.com/AstaaDev/chocolate-enggineering-")
